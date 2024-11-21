@@ -1,43 +1,61 @@
 #Download the GEO rat ketogenic brain data set  
 rat_KD <-read.table("/Users/rishithapulakhandam/Downloads/rat_KD.txt",header=T,row.names=1)
+
 #log2 the data, then use the Student’s t-test  
 rat_KD_log2 <-log2(rat_KD)
 t.test.all.genes <- function(x,s1,s2) {
-x1 <- x[s1]
-x2 <- x[s2]
-x1 <- as.numeric(x1)
-x2 <- as.numeric(x2)
-t.out <- t.test(x1,x2, alternative="two.sided",var.equal=T) out <- as.numeric(t.out$p.value)
-return(out)
+  x1 <- x[s1]
+  x2 <- x[s2]
+  x1 <- as.numeric(x1)
+  x2 <- as.numeric(x2)
+  t.out <- t.test(x1,x2, alternative="two.sided",var.equal=T) 
+  out <- as.numeric(t.out$p.value)
+  return(out)
 }
 pv <- apply(rat_KD_log2,1,t.test.all.genes,s1=1:6,s2=7:12)
-#histogram of the p-values  
 
- par(mfrow=c(1,2))
+#histogram of the p-values  
+par(mfrow=c(1,2))
 hist(pv,col="lightblue",xlab="p-values",main="P-value dist’n between\nGC and ACT groups",c
 
-   abline(v=.05,col=2,lwd=2)
+abline(v=.05,col=2,lwd=2)
 hist(-log10(pv),col="lightblue",xlab="log10(p-values)", main="-log10(pv) dist’n between\nG
- abline(v= -log10(.05),col=2,lwd=2)
- p_values_df <- data.frame(pv)
-num_probesets_p_0.05 <- sum(p_values_df$pv < 0.05) num_probesets_p_0.05
- num_probesets_p_0.01 <- sum(p_values_df$pv < 0.01) num_probesets_p_0.01
- num_probesets_alpha_divided <- sum(0.05) / nrow(p_values_df) num_probesets_alpha_divided
+abline(v= -log10(.05),col=2,lwd=2)
 
+p_values_df <- data.frame(pv)
+num_probesets_p_0.05 <- sum(p_values_df$pv < 0.05) 
+num_probesets_p_0.05
 
+num_probesets_p_0.01 <- sum(p_values_df$pv < 0.01) 
+num_probesets_p_0.01
+
+num_probesets_alpha_divided <- sum(0.05) / nrow(p_values_df) 
+num_probesets_alpha_divided
+
+num_probesets_below_threshold <- sum(p_values_df$pv < num_probesets_alpha_divided) 
+num_probesets_below_threshold
 
 #Transforming the p-value and create a volcano plot 
-3
-ge', main = 'V
- num_probesets_below_threshold <- sum(p_values_df$pv < num_probesets_alpha_divided) num_probesets_below_threshold
- gc.m <- apply(rat_KD_log2[1:6],1,mean,na.rm=T)
-act.m <- apply(rat_KD_log2[,c("ketogenic.diet.19306", "ketogenic.diet.19307", "ketogenic.d fold <- gc.m-act.m
- linear_scale <- 2ˆfold max_linear_fold_change <- max(linear_scale) max_linear_fold_change
- min_linear_fold_change <- min(linear_scale) min_linear_fold_change
- bonferroni_threshold <- num_probesets_alpha_divided
-significant_probesets <- rownames(rat_KD_log2)[pv < bonferroni_threshold & abs(linear_scal significant_probesets
- p_value <- -1*log10(pv)
-plot(range(p_value),range(fold),type = 'n',xlab = '-1*log10(p values))', ylab = 'Fold chan points(p_value,fold,col='black')
+
+gc.m <- apply(rat_KD_log2[1:6],1,mean,na.rm=T)
+act.m <- apply(rat_KD_log2[,c("ketogenic.diet.19306", "ketogenic.diet.19307", "ketogenic.d 
+fold <- gc.m-act.m
+
+linear_scale <- 2ˆfold 
+max_linear_fold_change <- max(linear_scale) 
+max_linear_fold_change
+
+min_linear_fold_change <- min(linear_scale) 
+min_linear_fold_change
+
+bonferroni_threshold <- num_probesets_alpha_divided
+significant_probesets <- rownames(rat_KD_log2)[pv < bonferroni_threshold & abs(linear_scale)>2]
+significant_probesets
+
+p_value <- -1*log10(pv)
+plot(range(p_value),range(fold),type = 'n',xlab = '-1*log10(p values))', ylab = 'Fold change'
+points(p_value,fold,col='black')
+
 abline(v =-log10(0.05), col ='blue', lty=2)
 abline(h =1, col="red", lty =2)
 abline(h=-1, col ="red", lty=2)
